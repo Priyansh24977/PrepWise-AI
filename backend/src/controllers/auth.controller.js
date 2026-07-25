@@ -45,6 +45,12 @@ export async function registerUserController(req, res) {
 
     await user.save();
 
+    console.log("Testing mail connection...");
+
+    await transporter.verify();
+
+    console.log("Mail connection successful");
+
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: user.email,
@@ -60,7 +66,6 @@ export async function registerUserController(req, res) {
       success: true,
       message: "OTP sent successfully.",
     });
-
   } catch (err) {
     console.error("REGISTER ERROR:", err);
 
@@ -95,10 +100,10 @@ export async function loginUserController(req, res) {
   }
 
   if (!user.isVerified) {
-  return res.status(403).json({
-    message: "Please verify your email first.",
-  });
-}
+    return res.status(403).json({
+      message: "Please verify your email first.",
+    });
+  }
 
   const isPasswordVaild = await bcrypt.compare(password, user.password);
 
@@ -115,11 +120,11 @@ export async function loginUserController(req, res) {
   );
 
   res.cookie("token", token, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-  maxAge: 24 * 60 * 60 * 1000, // 1 day
-});
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+  });
 
   res.status(200).json({
     message: "User loggedIn successfully.",
@@ -146,10 +151,10 @@ export async function logoutUserController(req, res) {
   }
 
   res.clearCookie("token", {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-});
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  });
   res.status(200).json({
     message: "user logout successfully",
   });
@@ -173,7 +178,6 @@ export async function getmeController(req, res) {
 }
 
 export async function verifyOtpController(req, res) {
-
   const { email, otp } = req.body;
 
   if (!email || !otp) {
@@ -212,7 +216,6 @@ export async function verifyOtpController(req, res) {
     success: true,
     message: "Email verified successfully.",
   });
-
 }
 
 //  default registerUserController;
