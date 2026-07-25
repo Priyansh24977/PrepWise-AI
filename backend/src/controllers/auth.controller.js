@@ -107,7 +107,12 @@ export async function loginUserController(req, res) {
     { expiresIn: "1d" },
   );
 
-  res.cookie("token", token);
+  res.cookie("token", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  maxAge: 24 * 60 * 60 * 1000, // 1 day
+});
 
   res.status(200).json({
     message: "User loggedIn successfully.",
@@ -133,7 +138,11 @@ export async function logoutUserController(req, res) {
     await blacklist.save();
   }
 
-  res.clearCookie("token");
+  res.clearCookie("token", {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+});
   res.status(200).json({
     message: "user logout successfully",
   });
