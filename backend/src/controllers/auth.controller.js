@@ -11,57 +11,64 @@ import transporter from "../config/mail.js";
  * @access Public
  */
 export async function registerUserController(req, res) {
-  let { username, email, password } = req.body;
+  try {
+    let { username, email, password } = req.body;
 
-  if (!username || !email || !password) {
-    return res.status(400).json({
-      message: "Please provide all required fields",
+    if (!username || !email || !password) {
+      return res.status(400).json({
+        message: "Please provide all required fields",
+      });
+    }
+
+    const isUser = await User.findOne({
+      $or: [{ username }, { email }],
     });
-  }
-  const isUser = await User.findOne({
-    $or: [{ username }, { email }],
-  });
 
-  if (isUser) {
-    return res.status(400).json({
-      message: "User already exists with this username or email",
+    if (isUser) {
+      return res.status(400).json({
+        message: "User already exists with this username or email",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      username,
+      email,
+      password: hashedPassword,
     });
-  }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-  const user = new User({
-    username,
-    email,
-    password: hashedPassword,
-  });
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 5 * 60 * 1000;
 
-  user.otp = otp;
+    await user.save();
 
-  user.otpExpiry = Date.now() + 5 * 60 * 1000;
-
-  await user.save();
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-
-    to: user.email,
-
-    subject: "Verify your Email",
-
-    html: `
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "Verify your Email",
+      html: `
         <h2>Your OTP</h2>
-
         <h1>${otp}</h1>
-
         <p>OTP expires in 5 minutes.</p>
-    `,
-  });
- return res.status(201).json({
-  success: true,
-  message: "OTP sent successfully.",
-});
- 
+      `,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "OTP sent successfully.",
+    });
+
+  } catch (err) {
+    console.error("REGISTER ERROR:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
 }
 
 /**
