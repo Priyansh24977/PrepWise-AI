@@ -3,7 +3,7 @@ import Login from "../src/features/auth/pages/Login.jsx";
 import Register from "../src/features/auth/pages/Register.jsx";
 import Protected from "./features/auth/components/Protected.jsx";
 import Home from "./features/interview/pages/Home.jsx";
-import Interview from "./features/interview/pages/interview.jsx";
+import Interview from "./features/interview/pages/Interview.jsx";
 import VerifyOtp from "./features/auth/pages/verifyOtp.jsx";
 
 export const router = createBrowserRouter([
