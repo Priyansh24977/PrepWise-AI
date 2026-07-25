@@ -2,7 +2,7 @@ import User from "../models/user.model.js";
 import tokenBlacklistModel from "../models/blacklist.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import transporter from "../config/mail.js";
+import resend from "../config/mail.js";
 
 /**
  * @name registerUserController
@@ -45,22 +45,18 @@ export async function registerUserController(req, res) {
 
     await user.save();
 
-    console.log("Testing mail connection...");
+   
 
-    await transporter.verify();
-
-    console.log("Mail connection successful");
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: "Verify your Email",
-      html: `
-        <h2>Your OTP</h2>
-        <h1>${otp}</h1>
-        <p>OTP expires in 5 minutes.</p>
-      `,
-    });
+    await resend.emails.send({
+  from: "onboarding@resend.dev",
+  to: user.email,
+  subject: "Verify your Email",
+  html: `
+    <h2>Your OTP</h2>
+    <h1>${otp}</h1>
+    <p>This OTP expires in 5 minutes.</p>
+  `,
+});
 
     return res.status(201).json({
       success: true,
