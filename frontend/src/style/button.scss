@@ -1,0 +1,96 @@
+$bg-page: #0d1117;
+$bg-card: #161b22;
+$bg-panel: #1c2230;
+$bg-input: #1e2535;
+$border-color: #2a3348;
+$text-primary: #e6edf3;
+$text-muted: #7d8590;
+$accent: #ff2d78;
+$accent-alt: #ff6b9d;
+$badge-required: #ff2d78;
+$badge-best: #ff2d78;
+$info-bg: #1b2a4a;
+$info-border: #2d4a7a;
+$font-stack:
+  system-ui,
+  -apple-system,
+  BlinkMacSystemFont,
+  "Segoe UI",
+  Roboto,
+  sans-serif;
+
+.button{
+    border:none;
+    outline: none;
+    padding-inline: 1.5rem;
+    padding-block:0.75rem;
+    border-radius:1rem;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+
+    &.primary-button{
+          background: linear-gradient(135deg, $accent 0%, darken($accent, 10%) 100%);
+        color: white;
+    }
+    &:active{
+        transform: scale(0.9);
+    }
+}
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.header-top > div {
+  flex: 1;
+}
+
+.page-header h1 {
+  margin-bottom: 0.8rem;
+}
+
+.page-header p {
+  margin: 0;
+}
+
+.header-top .button {
+  margin-top: 0.3rem;
+}
+
+
+
+
+//logout
+.interview-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logout-btn {
+  padding: 12px 22px;
+  border-radius: 10px;
+  border: 1px solid #444b5d;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.logout-btn:hover {
+  background: #2a2f3d;
+}

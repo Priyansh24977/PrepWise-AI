@@ -1,0 +1,75 @@
+@media (max-width: 768px) {
+  .interview-card__footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+  }
+
+  .footer-info {
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .generate-btn {
+    width: 100%;
+    max-width: 320px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .interview-card__body {
+    flex-direction: column;
+  }
+
+  .panel-divider {
+    display: none;
+  }
+
+  .panel {
+    width: 100%;
+  }
+}
+
+
+
+
+@media (max-width: 768px) {
+  .interview-layout {
+    flex-direction: column;
+  }
+
+  .interview-nav,
+  .interview-sidebar {
+    width: 100%;
+  }
+
+  .interview-divider {
+    display: none;
+  }
+}
+
+
+
+@media (max-width: 768px) {
+  .generate-btn,
+  .primary-button {
+    width: 100%;
+  }
+}
+
+
+
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+}

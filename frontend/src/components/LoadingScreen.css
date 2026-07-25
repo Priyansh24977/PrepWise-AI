@@ -1,0 +1,45 @@
+.loading-screen {
+  min-height: 100vh;
+  background: #0d1117;/* Match your app background */
+  color: #fff;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+}
+
+.spinner {
+  width: 70px;
+  height: 70px;
+  border: 5px solid rgba(255,255,255,0.15);
+  border-top: 5px solid #7c3aed;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-title {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.loading-text {
+  color: #94a3b8;
+  font-size: 16px;
+}
+
+.steps {
+  margin-top: 15px;
+}
+
+.steps p {
+  color: #cbd5e1;
+  margin: 10px 0;
+}

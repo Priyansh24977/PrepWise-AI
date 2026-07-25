@@ -1,0 +1,39 @@
+import { createBrowserRouter } from "react-router";
+import Login from "../src/features/auth/pages/Login.jsx";
+import Register from "../src/features/auth/pages/Register.jsx";
+import Protected from "./features/auth/components/Protected.jsx";
+import Home from "./features/interview/pages/Home.jsx";
+import Interview from "./features/interview/pages/interview.jsx";
+import VerifyOtp from "./features/auth/pages/verifyOtp.jsx";
+
+export const router = createBrowserRouter([
+  {
+    path: "/login",
+    element: <Login />,
+  },
+
+  {
+    path: "/register",
+    element: <Register />,
+  },
+  {
+    path: "/verify-otp",
+    element: <VerifyOtp />,
+  },
+  {
+    path: "/",
+    element: (
+      <Protected>
+        <Home />
+      </Protected>
+    ),
+  },
+  {
+    path: "/interview/:interviewId",
+    element: (
+      <Protected>
+        <Interview />
+      </Protected>
+    ),
+  },
+]);
