@@ -56,10 +56,13 @@ return JSON.parse(response.text);
 
 
 export async function generatePdfFromHtml(htmlContent) {
-    console.log("Chrome Path:", puppeteer.executablePath());
+  const executablePath = await puppeteer.executablePath();
+
+  console.log("Chrome Path:", executablePath);
+
   const browser = await puppeteer.launch({
+    executablePath,
     headless: true,
-    executablePath: puppeteer.executablePath(),
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
@@ -67,23 +70,13 @@ export async function generatePdfFromHtml(htmlContent) {
   });
 
   const page = await browser.newPage();
-
-  await page.setContent(htmlContent, {
-    waitUntil: "networkidle0",
-  });
+  await page.setContent(htmlContent, { waitUntil: "networkidle0" });
 
   const pdfBuffer = await page.pdf({
     format: "A4",
-    margin: {
-      top: "20mm",
-      bottom: "20mm",
-      left: "15mm",
-      right: "15mm",
-    },
   });
 
   await browser.close();
-
   return pdfBuffer;
 }
 
