@@ -1,8 +1,13 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+import * as brevo from "@getbrevo/brevo";
 
+const apiInstance = new brevo.TransactionalEmailsApi();
 
-export default resend;
+apiInstance.setApiKey(
+  brevo.TransactionalEmailsApiApiKeys.apiKey,
+  process.env.BREVO_API_KEY
+);
+
+export default apiInstance;

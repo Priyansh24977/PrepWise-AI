@@ -2,8 +2,8 @@ import User from "../models/user.model.js";
 import tokenBlacklistModel from "../models/blacklist.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import resend from "../config/mail.js";
-
+import apiInstance from "../config/mail.js";
+import * as brevo from "@getbrevo/brevo";
 /**
  * @name registerUserController
  * @description Controller to handle user registration
@@ -47,18 +47,28 @@ export async function registerUserController(req, res) {
 
    
 
-   const { data, error } = await resend.emails.send({
-  from: "onboarding@resend.dev",
-  to: user.email,
-  subject: "Verify your Email",
-  html: `
-    <h2>Your OTP</h2>
-    <h1>${otp}</h1>
-  `,
-});
+   const sendSmtpEmail = new brevo.SendSmtpEmail();
 
-console.log("Data:", data);
-console.log("Error:", error);
+sendSmtpEmail.sender = {
+  name: "PrepWise",
+  email: "priyanshdwivedi15@gmail.com",
+};
+
+sendSmtpEmail.to = [
+  {
+    email: user.email,
+  },
+];
+
+sendSmtpEmail.subject = "Verify your Email";
+
+sendSmtpEmail.htmlContent = `
+  <h2>Your OTP</h2>
+  <h1>${otp}</h1>
+  <p>Your OTP expires in 5 minutes.</p>
+`;
+
+await apiInstance.sendTransacEmail(sendSmtpEmail);
 
 
     return res.status(201).json({
