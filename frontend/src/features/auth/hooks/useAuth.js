@@ -23,18 +23,7 @@ export const useAuth = () => {
   }
 };
 
-  const handleRegister = async ({ username, email, password }) => {
-    setLoading(true);
-    try {
-      const data = await register({ username, email, password });
-      return true;
-    } catch (err) {
-        console.error(err);
-    return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+ 
 
   const handleLogout = async () => {
     setLoading(true);
