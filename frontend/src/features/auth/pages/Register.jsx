@@ -16,9 +16,7 @@ const [email, setEmail] = useState("");
 
   console.log("Register success:", success);
     if (success) {
-  navigate("/verify-otp", {
-    state: { email },
-  });
+navigate("/");
 }
   };
 

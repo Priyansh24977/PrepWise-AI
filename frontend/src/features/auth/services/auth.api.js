@@ -63,16 +63,3 @@ export async function getMe(){
     } 
 }
 
-export async function verifyOtp({ email, otp }) {
-  try {
-    const response = await api.post("/api/auth/verify-otp", {
-      email,
-      otp,
-    });
-
-    return response.data;
-  } catch (err) {
-    console.log(err);
-    throw err;
-  }
-}

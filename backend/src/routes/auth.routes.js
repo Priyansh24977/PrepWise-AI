@@ -33,5 +33,4 @@ authRouter.get('/logout',logoutUserController);
 authRouter.get('/getme',authUser,getmeController);
 
 
-authRouter.post("/verify-otp", verifyOtpController);
 export default authRouter;

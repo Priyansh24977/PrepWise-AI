@@ -2,7 +2,6 @@ import User from "../models/user.model.js";
 import tokenBlacklistModel from "../models/blacklist.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import transporter from "../config/mail.js";
 /**
  * @name registerUserController
  * @description Controller to handle user registration
@@ -11,7 +10,7 @@ import transporter from "../config/mail.js";
  */
 export async function registerUserController(req, res) {
   try {
-    let { username, email, password } = req.body;
+    const { username, email, password } = req.body;
 
     if (!username || !email || !password) {
       return res.status(400).json({
@@ -31,46 +30,41 @@ export async function registerUserController(req, res) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = new User({
+    const user = await User.create({
       username,
       email,
       password: hashedPassword,
     });
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const token = jwt.sign(
+      {
+        id: user._id,
+        username: user.username,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
 
-    user.otp = otp;
-    user.otpExpiry = Date.now() + 5 * 60 * 1000;
-
-    await user.save();
-
-    // Fix: rollback user creation if email sending fails
-    try {
-      await transporter.sendMail({
-        from: '"PrepWise" <priyanshdwivedi15@gmail.com>',
-        to: user.email,
-        subject: "Verify your Email",
-        html: `
-          <h2>Your OTP</h2>
-          <h1>${otp}</h1>
-          <p>Your OTP expires in 5 minutes.</p>
-        `,
-      });
-    } catch (emailErr) {
-      await User.deleteOne({ _id: user._id });
-      return res.status(500).json({
-        success: false,
-        message: "Failed to send OTP email. Please try again.",
-        error:emailErr.message
-      });
-    }
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
     return res.status(201).json({
       success: true,
-      message: "OTP sent successfully.",
+      message: "Account created successfully",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+      },
     });
   } catch (err) {
-    console.error("REGISTER ERROR:", err);
+    console.error(err);
 
     return res.status(500).json({
       success: false,
@@ -102,11 +96,7 @@ export async function loginUserController(req, res) {
     });
   }
 
-  if (!user.isVerified) {
-    return res.status(403).json({
-      message: "Please verify your email first.",
-    });
-  }
+
 
   const isPasswordVaild = await bcrypt.compare(password, user.password);
 
@@ -180,45 +170,3 @@ export async function getmeController(req, res) {
   });
 }
 
-export async function verifyOtpController(req, res) {
-  const { email, otp } = req.body;
-
-  if (!email || !otp) {
-    return res.status(400).json({
-      message: "Email and OTP are required",
-    });
-  }
-
-  const user = await User.findOne({ email });
-
-  if (!user) {
-    return res.status(404).json({
-      message: "User not found",
-    });
-  }
-
-  if (user.otp !== otp) {
-    return res.status(400).json({
-      message: "Invalid OTP",
-    });
-  }
-
-  if (user.otpExpiry < Date.now()) {
-    return res.status(400).json({
-      message: "OTP expired",
-    });
-  }
-
-  user.isVerified = true;
-  user.otp = null;
-  user.otpExpiry = null;
-
-  await user.save();
-
-  return res.status(200).json({
-    success: true,
-    message: "Email verified successfully.",
-  });
-}
-
-//  default registerUserController;
