@@ -56,25 +56,35 @@ return JSON.parse(response.text);
 
 
 export async function generatePdfFromHtml(htmlContent) {
-   const browser = await puppeteer.launch({
+    console.log("Chrome Path:", puppeteer.executablePath());
+  const browser = await puppeteer.launch({
     headless: true,
-     args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
-    const page = await browser.newPage();
-    await page.setContent(htmlContent, { waitUntil: "networkidle0" })
+    executablePath: puppeteer.executablePath(),
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+    ],
+  });
 
-    const pdfBuffer = await page.pdf({
-        format: "A4", margin: {
-            top: "20mm",
-            bottom: "20mm",
-            left: "15mm",
-            right: "15mm"
-        }
-    })
+  const page = await browser.newPage();
 
-    await browser.close()
+  await page.setContent(htmlContent, {
+    waitUntil: "networkidle0",
+  });
 
-    return pdfBuffer
+  const pdfBuffer = await page.pdf({
+    format: "A4",
+    margin: {
+      top: "20mm",
+      bottom: "20mm",
+      left: "15mm",
+      right: "15mm",
+    },
+  });
+
+  await browser.close();
+
+  return pdfBuffer;
 }
 
 export async function generateResumePdf({ resume, selfDescription, jobDescription }) {
