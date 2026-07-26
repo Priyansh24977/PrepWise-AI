@@ -23,7 +23,22 @@ export const useAuth = () => {
   }
 };
 
- 
+ const handleLogin = async ({ email, password }) => {
+  setLoading(true);
+
+  try {
+    const data = await login({ email, password });
+
+    setUser(data.user);
+
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleLogout = async () => {
     setLoading(true);
