@@ -61,6 +61,7 @@ export async function registerUserController(req, res) {
       return res.status(500).json({
         success: false,
         message: "Failed to send OTP email. Please try again.",
+        error:emailErr.message
       });
     }
 
