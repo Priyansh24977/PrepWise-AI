@@ -47,16 +47,19 @@ export async function registerUserController(req, res) {
 
    
 
-    await resend.emails.send({
+   const { data, error } = await resend.emails.send({
   from: "onboarding@resend.dev",
   to: user.email,
   subject: "Verify your Email",
   html: `
     <h2>Your OTP</h2>
     <h1>${otp}</h1>
-    <p>This OTP expires in 5 minutes.</p>
   `,
 });
+
+console.log("Data:", data);
+console.log("Error:", error);
+
 
     return res.status(201).json({
       success: true,
