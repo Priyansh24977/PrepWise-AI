@@ -1,3 +1,7 @@
+dns.setServers([
+  '8.8.8.8',
+  '8.8.4.4'
+]);
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -7,16 +11,12 @@ import dns from 'dns';
 
 
 
-dns.setServers([
-  '8.8.8.8',
-  '8.8.4.4'
-]);
+
 
 
 connectToDB();
-// invokeGemniniAi();
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

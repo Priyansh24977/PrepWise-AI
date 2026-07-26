@@ -44,19 +44,25 @@ export async function registerUserController(req, res) {
 
     await user.save();
 
-   
-
-   await transporter.sendMail({
-  from: '"PrepWise" <priyanshdwivedi15@gmail.com>',
-  to: user.email,
-  subject: "Verify your Email",
-  html: `
-    <h2>Your OTP</h2>
-    <h1>${otp}</h1>
-    <p>Your OTP expires in 5 minutes.</p>
-  `,
-});
-
+    // Fix: rollback user creation if email sending fails
+    try {
+      await transporter.sendMail({
+        from: '"PrepWise" <priyanshdwivedi15@gmail.com>',
+        to: user.email,
+        subject: "Verify your Email",
+        html: `
+          <h2>Your OTP</h2>
+          <h1>${otp}</h1>
+          <p>Your OTP expires in 5 minutes.</p>
+        `,
+      });
+    } catch (emailErr) {
+      await User.deleteOne({ _id: user._id });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send OTP email. Please try again.",
+      });
+    }
 
     return res.status(201).json({
       success: true,

@@ -4,12 +4,12 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
-    unique: [true, "username already taken"],
+    unique: true,
     required: true,
   },
   email: {
     type: String,
-    unique: [true, "Account already exsits with this email address"],
+    unique: true,
     required: true,
   },
   password: {
