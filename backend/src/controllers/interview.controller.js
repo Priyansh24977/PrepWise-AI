@@ -5,34 +5,34 @@ import { generateReportPdf } from '../services/pdf.service.js';
 
 export async function generateInterviewReportController(req, res) {
     try {
-        if (!req.file) {
-            return res.status(400).json({
-                message: "Resume file is missing"
-            });
-        }
-
-        let resumeText = '';
-        try {
-            const parser = new PDFParse(Uint8Array.from(req.file.buffer));
-            const extracted = await parser.getText();
-            resumeText = typeof extracted === 'string' ? extracted : (extracted?.text || '');
-            if (typeof parser.destroy === 'function') {
-                await parser.destroy();
-            }
-        } catch (pdfErr) {
-            console.error("PDF Parsing error fallback:", pdfErr.message);
-            resumeText = req.file.buffer.toString('utf-8');
-        }
-
         const { selfDescription, jobDescription } = req.body;
 
-        if (!jobDescription) {
+        if (!jobDescription || !jobDescription.trim()) {
             return res.status(400).json({ message: "Job description is required" });
         }
 
+        if (!req.file && (!selfDescription || !selfDescription.trim())) {
+            return res.status(400).json({ message: "Please provide either a Resume file or a Self Description." });
+        }
+
+        let resumeText = '';
+        if (req.file) {
+            try {
+                const parser = new PDFParse(Uint8Array.from(req.file.buffer));
+                const extracted = await parser.getText();
+                resumeText = typeof extracted === 'string' ? extracted : (extracted?.text || '');
+                if (typeof parser.destroy === 'function') {
+                    await parser.destroy();
+                }
+            } catch (pdfErr) {
+                console.error("PDF Parsing error fallback:", pdfErr.message);
+                resumeText = req.file.buffer.toString('utf-8');
+            }
+        }
+
         const interviewReportByAi = await generateInterviewReport({
-            resume: resumeText,
-            selfDescription: selfDescription || '',
+            resume: resumeText || 'Not provided',
+            selfDescription: selfDescription || 'Not provided',
             jobDescription
         });
 
