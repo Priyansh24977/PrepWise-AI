@@ -2,34 +2,33 @@ import nodemailer from 'nodemailer';
 
 let transporter = null;
 
-function getTransporter() {
-    if (transporter) return transporter;
-
-    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
-    const port = process.env.SMTP_PORT || process.env.EMAIL_PORT || 587;
+function createTransporter(targetPort, isSecure) {
+    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST || 'smtp.gmail.com';
     const user = process.env.SMTP_USER || process.env.EMAIL_USER;
     const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
 
-    if (host && user && pass) {
-        transporter = nodemailer.createTransport({
-            host,
-            port: Number(port),
-            secure: Number(port) === 465,
-            auth: { user, pass }
-        });
-    }
-    return transporter;
+    if (!user || !pass) return null;
+
+    return nodemailer.createTransport({
+        host,
+        port: Number(targetPort),
+        secure: isSecure,
+        auth: { user, pass },
+        connectionTimeout: 10000,
+    });
 }
 
 export async function sendOtpEmail(email, otp) {
-    const activeTransporter = getTransporter();
+    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+    const initialPort = process.env.SMTP_PORT || process.env.EMAIL_PORT || 587;
 
     console.log(`\n==========================================`);
     console.log(`🔑 OTP GENERATED FOR [${email}]: ${otp}`);
     console.log(`==========================================\n`);
 
-    if (!activeTransporter) {
-        console.log(`ℹ️ [Email Service] SMTP credentials not set in .env. OTP logged above for development testing.`);
+    if (!user || !pass) {
+        console.log(`ℹ️ [Email Service] SMTP credentials not set in environment. OTP logged above.`);
         return { success: true, mode: 'console' };
     }
 
@@ -52,17 +51,32 @@ export async function sendOtpEmail(email, otp) {
         </div>
     `;
 
+    // Attempt 1: Try configured port
     try {
-        await activeTransporter.sendMail({
-            from: `"PrepWise AI" <${process.env.SMTP_USER || process.env.EMAIL_USER}>`,
+        const transporter = createTransporter(initialPort, Number(initialPort) === 465);
+        await transporter.sendMail({
+            from: `"PrepWise AI" <${user}>`,
             to: email,
             subject: `${otp} is your PrepWise AI verification code`,
             html: htmlContent
         });
         return { success: true, mode: 'smtp' };
-    } catch (error) {
-        console.error('❌ Failed to send OTP email via SMTP:', error.message);
-        // Fallback return success with console mode notification so testing doesn't fail completely
-        return { success: true, mode: 'console-fallback', error: error.message };
+    } catch (primaryErr) {
+        console.warn(`⚠️ Primary SMTP send failed on port ${initialPort}: ${primaryErr.message}. Trying fallback port...`);
+        // Attempt 2: Fallback to port 465 (SSL)
+        const fallbackPort = Number(initialPort) === 465 ? 587 : 465;
+        try {
+            const fallbackTransporter = createTransporter(fallbackPort, fallbackPort === 465);
+            await fallbackTransporter.sendMail({
+                from: `"PrepWise AI" <${user}>`,
+                to: email,
+                subject: `${otp} is your PrepWise AI verification code`,
+                html: htmlContent
+            });
+            return { success: true, mode: 'smtp-fallback' };
+        } catch (fallbackErr) {
+            console.error('❌ Failed to send OTP email via SMTP on fallback:', fallbackErr.message);
+            return { success: true, mode: 'console-fallback', error: fallbackErr.message };
+        }
     }
 }

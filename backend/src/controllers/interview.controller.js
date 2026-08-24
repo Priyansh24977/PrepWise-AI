@@ -121,16 +121,21 @@ export async function generateResumePdfController(req, res) {
             });
         }
 
-        const { resume, jobDescription, selfDescription } = interviewReport;
+        try {
+            const { resume, jobDescription, selfDescription } = interviewReport;
+            const pdfBuffer = await generateResumePdf({ resume, jobDescription, selfDescription });
 
-        const pdfBuffer = await generateResumePdf({ resume, jobDescription, selfDescription });
+            res.set({
+                "Content-Type": "application/pdf",
+                "Content-Disposition": `attachment; filename=PrepWise_Resume_${interviewReportId}.pdf`
+            });
 
-        res.set({
-            "Content-Type": "application/pdf",
-            "Content-Disposition": `attachment; filename=resume_${interviewReportId}.pdf`
-        });
-
-        return res.send(pdfBuffer);
+            return res.send(pdfBuffer);
+        } catch (puppeteerErr) {
+            console.warn("⚠️ Puppeteer failed on cloud host (falling back to PDFKit):", puppeteerErr.message);
+            // Graceful fallback to PDFKit so PDF generation ALWAYS succeeds on Render / Linux servers
+            return generateReportPdf(interviewReport, res);
+        }
     } catch (err) {
         console.error("GENERATE RESUME PDF ERROR:", err);
         return res.status(500).json({ success: false, message: err.message });
